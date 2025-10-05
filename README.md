@@ -21,7 +21,7 @@ A comprehensive medical assessment system for Parkinson's disease diagnosis usin
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/parkinsons-assessment-system.git
+git clone https://github.com/macayu17/parkinsons-assessment-system.git
 
 # Install dependencies
 pip install -r requirements.txt
