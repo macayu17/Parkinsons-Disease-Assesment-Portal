@@ -1,0 +1,33 @@
+Title: Differential Diagnosis of Parkinsonian Syndromes
+Author: Dr. Sarah Chen
+Date: 2023-08-10
+
+Abstract:
+This paper discusses the differential diagnosis of Parkinson's Disease (PD) and other parkinsonian syndromes, providing clinical guidelines for accurate diagnosis.
+
+Key Points:
+1. Parkinson's Disease vs. Essential Tremor:
+   - PD tremor: Typically resting, asymmetric, 4-6 Hz frequency
+   - Essential tremor: Primarily postural/action tremor, often symmetric, 8-12 Hz frequency
+   - Essential tremor patients typically lack bradykinesia and rigidity
+   - Family history more common in essential tremor
+
+2. Parkinson's Disease vs. SWEDD:
+   - SWEDD (Scans Without Evidence of Dopaminergic Deficit) patients present with parkinsonian symptoms
+   - Normal dopaminergic imaging distinguishes SWEDD from PD
+   - SWEDD patients often show dystonic features and lack true bradykinesia
+   - SWEDD patients typically do not respond well to levodopa therapy
+
+3. Parkinson's Disease vs. Atypical Parkinsonism:
+   - Multiple System Atrophy (MSA): Early autonomic failure, cerebellar signs, poor levodopa response
+   - Progressive Supranuclear Palsy (PSP): Early falls, vertical gaze palsy, axial rigidity
+   - Corticobasal Degeneration (CBD): Asymmetric apraxia, alien limb phenomenon, cortical sensory loss
+
+4. Prodromal Parkinson's Disease:
+   - REM sleep behavior disorder: 80% convert to synucleinopathy within 10-15 years
+   - Hyposmia: Reduced sense of smell often precedes motor symptoms by years
+   - Constipation: Common non-motor symptom that may appear decades before diagnosis
+   - Subtle motor changes: Reduced arm swing, changes in handwriting, voice softening
+
+Conclusion:
+Accurate differential diagnosis requires careful clinical assessment, consideration of response to levodopa, neuroimaging, and monitoring of disease progression. Early non-motor symptoms may help identify prodromal PD cases before classic motor features emerge.
