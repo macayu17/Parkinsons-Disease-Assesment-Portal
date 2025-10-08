@@ -17,9 +17,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 from rag_system import ReportGenerator, MedicalKnowledgeBase
 from document_manager import DocumentManager
 
-# Set template folder to the templates directory in the project root
-template_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'templates')
-app = Flask(__name__, template_folder=template_dir)
+# Set template and static folders to the directories in the project root
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+template_dir = os.path.join(project_root, 'templates')
+static_dir = os.path.join(project_root, 'static')
+
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.secret_key = 'parkinson_assessment_secret_key_2024'
 
 # Initialize global components

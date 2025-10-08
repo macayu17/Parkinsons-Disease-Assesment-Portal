@@ -18,19 +18,31 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="patient_id" class="form-label" style="color: #000000 !important; background-color: #ffffff !important; font-weight: 700 !important; display: inline-block !important; padding: 2px 5px !important; border-radius: 3px !important; box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; border: 1px solid #000 !important;">Patient ID</label>
+                                <label for="patient_id" class="form-label">
+                                    Patient ID
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Unique identifier for the patient"></i>
+                                </label>
                                 <input type="text" class="form-control" id="patient_id" name="patient_id" 
                                        placeholder="Enter patient identifier">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="age" class="form-label">Age <span class="text-danger">*</span></label>
+                                <label for="age" class="form-label">
+                                    Age <span class="text-danger">*</span>
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Patient's age in years. Age is a significant risk factor for Parkinson's disease, with incidence increasing after age 60."></i>
+                                </label>
                                 <input type="number" class="form-control" id="age" name="age" 
                                        min="18" max="100" required placeholder="Enter age">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="SEX" class="form-label" data-tooltip="Biological sex of the patient">Sex <span class="text-danger">*</span></label>
+                                <label for="SEX" class="form-label">
+                                    Sex <span class="text-danger">*</span>
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Biological sex of the patient. Men are 1.5 times more likely to develop Parkinson's disease than women."></i>
+                                </label>
                                 <select class="form-control" id="SEX" name="SEX" required>
                                     <option value="">Select sex</option>
                                     <option value="0">Female</option>
@@ -38,14 +50,22 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="EDUCYRS" class="form-label" data-tooltip="Total years of formal education completed">Education Years <span class="text-danger">*</span></label>
+                                <label for="EDUCYRS" class="form-label">
+                                    Education Years <span class="text-danger">*</span>
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Total years of formal education completed. Higher education may provide cognitive reserve that delays symptom onset."></i>
+                                </label>
                                 <input type="number" class="form-control" id="EDUCYRS" name="EDUCYRS" 
                                        min="0" max="25" required placeholder="Years of education">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="race" class="form-label">Race</label>
+                                <label for="race" class="form-label">
+                                    Race
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Patient's racial background. Some ethnic groups show different prevalence rates of Parkinson's disease."></i>
+                                </label>
                                 <select class="form-control" id="race" name="race">
                                     <option value="">Select race</option>
                                     <option value="1">White</option>
@@ -55,7 +75,11 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="BMI" class="form-label">BMI <span class="text-danger">*</span></label>
+                                <label for="BMI" class="form-label">
+                                    BMI <span class="text-danger">*</span>
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Body Mass Index (weight in kg / height in m²). Lower BMI may be associated with PD progression."></i>
+                                </label>
                                 <input type="number" class="form-control" id="BMI" name="BMI" 
                                        min="15" max="50" step="0.1" required placeholder="Body Mass Index">
                             </div>
@@ -69,14 +93,22 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="fampd" class="form-label">Family History of PD</label>
+                                <label for="fampd" class="form-label">
+                                    Family History of PD
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Having a first-degree relative with Parkinson's disease increases risk by 2-3 times."></i>
+                                </label>
                                 <select class="form-control" id="fampd" name="fampd">
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="fampd_bin" class="form-label">Family PD (Binary)</label>
+                                <label for="fampd_bin" class="form-label">
+                                    Family PD (Binary)
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Binary indicator of family history of Parkinson's disease."></i>
+                                </label>
                                 <select class="form-control" id="fampd_bin" name="fampd_bin">
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
@@ -92,7 +124,11 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="sym_tremor" class="form-label" data-tooltip="Rhythmic, involuntary movements, often in hands, fingers, or chin. A cardinal symptom of Parkinson's disease.">Tremor Severity</label>
+                                <label for="sym_tremor" class="form-label">
+                                    Tremor Severity
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Rhythmic, involuntary shaking movements, often starting in hands or fingers at rest. A cardinal symptom of Parkinson's disease."></i>
+                                </label>
                                 <select class="form-control" id="sym_tremor" name="sym_tremor">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -102,7 +138,11 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sym_rigid" class="form-label" data-tooltip="Stiffness in limbs and trunk that increases with movement. A cardinal symptom of Parkinson's disease.">Rigidity</label>
+                                <label for="sym_rigid" class="form-label">
+                                    Rigidity
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Increased muscle stiffness in limbs and trunk that persists throughout movement range. A cardinal symptom of Parkinson's disease."></i>
+                                </label>
                                 <select class="form-control" id="sym_rigid" name="sym_rigid">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -114,7 +154,11 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="sym_brady" class="form-label" data-tooltip="Slowness of movement, a cardinal symptom of Parkinson's disease. Includes difficulty initiating movements and reduced amplitude of movement.">Bradykinesia</label>
+                                <label for="sym_brady" class="form-label">
+                                    Bradykinesia
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Slowness of movement and reduced amplitude. Difficulty initiating movements. A cardinal symptom required for PD diagnosis."></i>
+                                </label>
                                 <select class="form-control" id="sym_brady" name="sym_brady">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -124,7 +168,11 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sym_posins" class="form-label" data-tooltip="Impaired balance and coordination leading to instability when standing or walking. A cardinal symptom that typically appears in later stages of Parkinson's disease.">Postural Instability</label>
+                                <label for="sym_posins" class="form-label">
+                                    Postural Instability
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Impaired balance and coordination leading to falls. Typically appears in later stages of Parkinson's disease."></i>
+                                </label>
                                 <select class="form-control" id="sym_posins" name="sym_posins">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -143,26 +191,42 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="rem" class="form-label" data-tooltip="REM Sleep Behavior Disorder (RBD) is characterized by acting out dreams during REM sleep. It's a strong prodromal marker for Parkinson's disease.">REM Sleep Disorder</label>
+                                <label for="rem" class="form-label">
+                                    REM Sleep Disorder
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Acting out dreams during REM sleep. One of the strongest prodromal markers for Parkinson's disease, can appear years before motor symptoms."></i>
+                                </label>
                                 <select class="form-control" id="rem" name="rem">
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="ess" class="form-label">Epworth Sleepiness Scale</label>
+                                <label for="ess" class="form-label">
+                                    Epworth Sleepiness Scale
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Measures daytime sleepiness (0-24). Score >10 indicates excessive sleepiness. Common in PD patients."></i>
+                                </label>
                                 <input type="number" class="form-control" id="ess" name="ess" 
                                        min="0" max="24" placeholder="0-24 scale">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="gds" class="form-label">Geriatric Depression Scale</label>
+                                <label for="gds" class="form-label">
+                                    Geriatric Depression Scale
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Depression screening (0-15). Score >5 suggests depression. Depression affects 40-50% of PD patients."></i>
+                                </label>
                                 <input type="number" class="form-control" id="gds" name="gds" 
                                        min="0" max="15" placeholder="0-15 scale">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="stai" class="form-label">State-Trait Anxiety Inventory</label>
+                                <label for="stai" class="form-label">
+                                    State-Trait Anxiety Inventory
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Anxiety assessment (20-80). Higher scores indicate more anxiety. Anxiety is common in PD patients."></i>
+                                </label>
                                 <input type="number" class="form-control" id="stai" name="stai" 
                                        min="20" max="80" placeholder="20-80 scale">
                             </div>
@@ -176,17 +240,29 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="moca" class="form-label">MoCA Score</label>
+                                <label for="moca" class="form-label">
+                                    MoCA Score
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Montreal Cognitive Assessment (0-30). Score <26 suggests cognitive impairment. Sensitive to PD-related cognitive decline."></i>
+                                </label>
                                 <input type="number" class="form-control" id="moca" name="moca" 
                                        min="0" max="30" placeholder="0-30 scale">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="clockdraw" class="form-label">Clock Drawing Test</label>
+                                <label for="clockdraw" class="form-label">
+                                    Clock Drawing Test
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Visuospatial and executive function test (0-4). Lower scores indicate cognitive impairment."></i>
+                                </label>
                                 <input type="number" class="form-control" id="clockdraw" name="clockdraw" 
                                        min="0" max="4" placeholder="0-4 scale">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="bjlot" class="form-label">Benton Line Orientation</label>
+                                <label for="bjlot" class="form-label">
+                                    Benton Line Orientation
+                                    <i class="fas fa-info-circle text-info ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Tests visuospatial judgment (0-30). Sensitive to right hemisphere and posterior cortical dysfunction in PD."></i>
+                                </label>
                                 <input type="number" class="form-control" id="bjlot" name="bjlot" 
                                        min="0" max="30" placeholder="0-30 scale">
                             </div>
@@ -267,6 +343,14 @@
     let currentPatientData = {};
     let currentReportFilename = '';
     let probabilityChart = null;
+
+    // Initialize Bootstrap tooltips when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
 
     // Form submission
     document.getElementById('assessmentForm').addEventListener('submit', function(e) {

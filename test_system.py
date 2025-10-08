@@ -52,9 +52,9 @@ def test_prediction():
     try:
         print("\nLoading models...")
         report_gen.load_models()
-        print("✓ Models loaded successfully")
+        print("[OK] Models loaded successfully")
     except Exception as e:
-        print(f"✗ Error loading models: {e}")
+        print(f"[ERROR] Error loading models: {e}")
         print("\nThis is expected if models haven't been trained yet.")
         print("The system will use fallback rule-based classification.")
     
@@ -77,7 +77,7 @@ def test_prediction():
         for i, (name, prob) in enumerate(zip(class_names, probs)):
             print(f"    {name}: {prob:.2%}")
         
-        print("\n✓ Prediction completed successfully")
+        print("\n[OK] Prediction completed successfully")
         
         # Generate report
         print("\n" + "=" * 70)
@@ -88,12 +88,12 @@ def test_prediction():
         print("\nReport Preview (first 500 characters):")
         print(report[:500] + "...")
         
-        print("\n✓ Report generated successfully")
+        print("\n[OK] Report generated successfully")
         
         return True
         
     except Exception as e:
-        print(f"\n✗ Error during prediction: {e}")
+        print(f"\n[ERROR] Error during prediction: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     
     print("\n" + "=" * 70)
     if success:
-        print("✓ All tests passed!")
+        print("[OK] All tests passed!")
     else:
-        print("✗ Some tests failed. Check the error messages above.")
+        print("[ERROR] Some tests failed. Check the error messages above.")
     print("=" * 70)

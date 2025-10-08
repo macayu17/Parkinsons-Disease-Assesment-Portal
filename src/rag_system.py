@@ -180,32 +180,29 @@ class ReportGenerator:
             # Store original patient data for report generation
             self.original_patient_data = patient_data.copy()
             
-            # Create a feature vector with the expected number of features (59 based on error)
-            # Fill with normalized values based on patient data
-            feature_vector = np.zeros(59)
+            # Use the preprocessor to properly prepare the data
+            if self.preprocessor is None:
+                self.preprocessor = DataPreprocessor()
             
-            # Map basic features to the first positions
-            basic_features = ['age', 'SEX', 'EDUCYRS', 'race', 'BMI', 'fampd', 'fampd_bin',
-                             'sym_tremor', 'sym_rigid', 'sym_brady', 'sym_posins', 'rem', 
-                             'ess', 'gds', 'stai', 'moca', 'clockdraw', 'bjlot']
+            # Create a DataFrame with the patient data
+            df_patient = pd.DataFrame([patient_data])
             
-            for i, feature in enumerate(basic_features):
-                if feature in patient_data and i < 59:
-                    # Simple normalization (in practice, use the same scaler as training)
-                    value = patient_data[feature]
-                    if feature == 'age':
-                        feature_vector[i] = (value - 60) / 20  # Rough normalization
-                    elif feature in ['SEX', 'fampd', 'fampd_bin']:
-                        feature_vector[i] = value
-                    elif feature in ['sym_tremor', 'sym_rigid', 'sym_brady', 'sym_posins']:
-                        feature_vector[i] = value / 4  # Assuming 0-4 scale
-                    elif feature == 'moca':
-                        feature_vector[i] = value / 30  # MoCA is 0-30
-                    else:
-                        feature_vector[i] = value / 100  # Generic normalization
+            # Apply the same preprocessing as training
+            # Handle missing values
+            df_processed = self.preprocessor.handle_missing_values(df_patient)
             
-            # Convert to DataFrame for ensemble prediction
-            df_processed = pd.DataFrame([feature_vector])
+            # Engineer features
+            df_processed = self.preprocessor.engineer_features(df_processed)
+            
+            # Encode categorical variables
+            categorical_cols = df_processed.select_dtypes(include=['object', 'category']).columns
+            for col in categorical_cols:
+                if col in df_processed.columns:
+                    df_processed[col] = self.preprocessor.label_encoder.fit_transform(df_processed[col].astype(str))
+            
+            # Scale numerical features
+            numeric_cols = df_processed.select_dtypes(include=['float64', 'int64']).columns
+            df_processed[numeric_cols] = self.preprocessor.scaler.fit_transform(df_processed[numeric_cols])
             
             # Make predictions using ensemble
             predictions, probabilities = self.ensemble.predict_ensemble(df_processed)
@@ -230,6 +227,8 @@ class ReportGenerator:
             
         except Exception as e:
             print(f"Error in prediction: {e}")
+            import traceback
+            traceback.print_exc()
             # Analyze symptoms to make a more informed prediction instead of defaulting to PD
             symptoms = {
                 'tremor': patient_data.get('sym_tremor', 0),
@@ -269,7 +268,8 @@ class ReportGenerator:
                 'ensemble_probabilities': probs,
                 'traditional_predictions': {'xgboost': pred_class, 'lightgbm': pred_class, 'svm': pred_class},
                 'transformer_predictions': {'transformer_small': pred_class, 'transformer_medium': pred_class, 'transformer_large': pred_class},
-                'confidence': max(probs)
+                'confidence': max(probs),
+                'patient_data': self.original_patient_data
             }
     
     def generate_clinical_summary(self, prediction_results: Dict, patient_data: Dict) -> str:
