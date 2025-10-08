@@ -12,6 +12,7 @@ from sklearn.ensemble import VotingClassifier, StackingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import cross_val_score, StratifiedKFold
+from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Dict, List, Tuple, Any
@@ -53,22 +54,22 @@ class MultimodalEnsemble:
             else:
                 print(f"Warning: {model_name} model not found at {model_path}")
     
-    def load_transformer_models(self, model_dir: str = "models/saved", input_dim: int = 31, num_classes: int = 4):
+    def load_transformer_models(self, model_dir: str = "models/saved", input_dim: int = 31, num_classes: int = 3):
         """Load pre-trained transformer models."""
         transformer_trainer = TransformerModels(device=self.device)
         
         model_configs = {
             'transformer_small': {
                 'type': 'transformer',
-                'params': {'d_model': 64, 'nhead': 4, 'num_layers': 2, 'dropout': 0.1}
+                'params': {'model_name': 'distilbert', 'dropout': 0.2}
             },
             'transformer_medium': {
                 'type': 'transformer', 
-                'params': {'d_model': 128, 'nhead': 8, 'num_layers': 3, 'dropout': 0.2}
+                'params': {'model_name': 'biobert', 'dropout': 0.25}
             },
             'transformer_large': {
                 'type': 'transformer',
-                'params': {'d_model': 256, 'nhead': 8, 'num_layers': 4, 'dropout': 0.3}
+                'params': {'model_name': 'pubmedbert', 'dropout': 0.25}
             },
             'feedforward': {
                 'type': 'feedforward',
@@ -78,11 +79,17 @@ class MultimodalEnsemble:
         
         for model_name, config in model_configs.items():
             model_path = os.path.join(model_dir, f"{model_name}_transformer.pth")
+            
             if os.path.exists(model_path):
                 try:
+                    # Remove model_name from params to avoid conflict
+                    params = config['params'].copy()
+                    if 'model_name' in params:
+                        del params['model_name']
+                    
                     model = transformer_trainer.load_model(
                         config['type'], model_name, input_dim, num_classes, 
-                        model_dir, **config['params']
+                        model_dir, **params
                     )
                     self.transformer_models[model_name] = model
                     print(f"Loaded {model_name} transformer model")
@@ -139,28 +146,43 @@ class MultimodalEnsemble:
         return predictions, probabilities
     
     def create_ensemble_features(self, X):
-        """Create ensemble features from all models."""
+        """Create ensemble features from all models with optimized weights."""
         # Get predictions from all models
         trad_preds, trad_probas = self.get_traditional_predictions(X)
         trans_preds, trans_probas = self.get_transformer_predictions(X)
         
-        # Combine all probability predictions as features
+        # Define model weights for better performance
+        model_weights = {
+            # Traditional models - higher weights for better performers
+            'lightgbm': 1.5,
+            'xgboost': 1.3,
+            'svm': 1.0,
+            # Transformer models - higher weights for specialized medical models
+            'pubmedbert_transformer': 2.0,
+            'biobert_transformer': 1.8,
+            'distilbert_transformer': 1.2,
+            'feedforward': 1.0
+        }
+        
+        # Combine all probability predictions as features with weights
         ensemble_features = []
         
-        # Add traditional model probabilities
+        # Add traditional model probabilities with weights
         for model_name, proba in trad_probas.items():
-            ensemble_features.append(proba)
+            weight = model_weights.get(model_name, 1.0)
+            ensemble_features.append(proba * weight)
         
-        # Add transformer model probabilities  
+        # Add transformer model probabilities with weights
         for model_name, proba in trans_probas.items():
-            ensemble_features.append(proba)
+            weight = model_weights.get(model_name, 1.0)
+            ensemble_features.append(proba * weight)
         
         # Add original features (scaled down)
         if hasattr(X, 'values'):
             X_vals = X.values
         else:
             X_vals = X
-        ensemble_features.append(X_vals * 0.1)  # Scale down original features
+        ensemble_features.append(X_vals * 0.15)  # Slightly increase original feature weight
         
         # Concatenate all features
         if ensemble_features:
@@ -177,11 +199,19 @@ class MultimodalEnsemble:
         print(f"Ensemble features shape: {ensemble_features.shape}")
         
         if ensemble_type == 'stacking':
-            # Use logistic regression as meta-learner
-            self.ensemble_model = LogisticRegression(
-                max_iter=1000, 
-                class_weight='balanced',
-                random_state=42
+            # Use XGBoost as meta-learner for better performance
+            self.ensemble_model = XGBClassifier(
+                n_estimators=200,
+                learning_rate=0.05,
+                max_depth=5,
+                min_child_weight=2,
+                gamma=0.1,
+                subsample=0.8,
+                colsample_bytree=0.8,
+                objective='multi:softproba',
+                random_state=42,
+                use_label_encoder=False,
+                eval_metric='mlogloss'
             )
         elif ensemble_type == 'voting':
             # Create voting classifier (if we have sklearn-compatible models)

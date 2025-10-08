@@ -67,19 +67,20 @@ class MedicalKnowledgeBase:
             },
             'SWEDD': {
                 'name': 'Scans Without Evidence of Dopaminergic Deficit',
-                'description': 'Clinical symptoms suggestive of PD but normal dopamine transporter imaging',
+                'description': 'Patients with parkinsonian symptoms but normal dopamine transporter imaging',
                 'characteristics': [
                     'Parkinsonian symptoms present',
-                    'Normal DaTscan results',
-                    'May have essential tremor or other conditions',
-                    'Uncertain diagnosis requiring monitoring'
+                    'Normal dopamine transporter scans',
+                    'May have tremor without other cardinal signs',
+                    'Often responsive to dopaminergic therapy initially',
+                    'Better long-term prognosis than typical PD'
                 ],
                 'recommendations': [
-                    'Regular clinical monitoring',
-                    'Consider alternative diagnoses',
-                    'Symptomatic treatment as needed',
-                    'Repeat imaging if symptoms progress',
-                    'Genetic counseling if family history present'
+                    'Careful clinical monitoring and re-evaluation',
+                    'Consider alternative diagnoses (essential tremor, drug-induced parkinsonism)',
+                    'Regular follow-up to monitor symptom progression',
+                    'Reassess need for dopaminergic medication',
+                    'Consider genetic testing if family history present'
                 ]
             },
             'PRODROMAL': {
@@ -161,7 +162,8 @@ class ReportGenerator:
         
         self.ensemble = MultimodalEnsemble()
         self.ensemble.load_traditional_models(model_dir)
-        self.ensemble.load_transformer_models(model_dir)
+        # Load transformer models with correct number of classes (4)
+        self.ensemble.load_transformer_models(model_dir, input_dim=59, num_classes=4)
         
         ensemble_path = os.path.join(model_dir, "multimodal_ensemble.joblib")
         self.ensemble.load_ensemble(ensemble_path)
@@ -215,7 +217,7 @@ class ReportGenerator:
             
             # For individual model predictions, use simpler approach
             trad_preds = {'xgboost': predictions[0], 'lightgbm': predictions[0], 'svm': predictions[0]}
-            trans_preds = {'transformer_small': predictions[0], 'transformer_medium': predictions[0]}
+            trans_preds = {'transformer_small': predictions[0], 'transformer_medium': predictions[0], 'transformer_large': predictions[0]}
             
             return {
                 'ensemble_prediction': predictions[0],
@@ -266,7 +268,7 @@ class ReportGenerator:
                 'ensemble_prediction': pred_class,
                 'ensemble_probabilities': probs,
                 'traditional_predictions': {'xgboost': pred_class, 'lightgbm': pred_class, 'svm': pred_class},
-                'transformer_predictions': {'transformer_small': pred_class, 'transformer_medium': pred_class},
+                'transformer_predictions': {'transformer_small': pred_class, 'transformer_medium': pred_class, 'transformer_large': pred_class},
                 'confidence': max(probs)
             }
     
@@ -276,7 +278,7 @@ class ReportGenerator:
         confidence = prediction_results['confidence']
         probabilities = prediction_results['ensemble_probabilities']
         
-        # Map prediction to class name
+        # Map prediction to class name - 4 classes
         class_names = ['HC', 'PD', 'SWEDD', 'PRODROMAL']
         predicted_condition = class_names[pred_class]
         
@@ -307,9 +309,11 @@ KEY CHARACTERISTICS OBSERVED:
         for char in disease_info['characteristics']:
             summary += f"• {char}\n"
             
-        # Add insights from medical literature
+        # Add insights from medical literature with better formatting
         if literature_insights:
-            summary += f"\nINSIGHTS FROM MEDICAL LITERATURE:\n{literature_insights}"
+            summary += f"\nINSIGHTS FROM MEDICAL LITERATURE:\n"
+            summary += "=" * 50 + "\n"
+            summary += literature_insights
         
         return summary
         
@@ -375,10 +379,18 @@ KEY CHARACTERISTICS OBSERVED:
         if not passages:
             return "No specific literature found for this patient's condition and symptoms."
         
-        # Format insights with more context
+        # Format insights with proper citations and more context
         insights = ""
         for i, passage in enumerate(passages):
-            insights += f"{i+1}. From '{passage['doc_title']}': {passage['text'][:400]}...\n\n"
+            # Extract document metadata for citation
+            doc_title = passage['doc_title']
+            doc_id = passage.get('doc_id', f"doc_{i}")
+            
+            # Format the citation properly
+            citation = f"[{doc_title}]"
+            
+            # Add the passage with citation
+            insights += f"{i+1}. From '{doc_title}': {passage['text'][:400]}...\n   {citation}\n\n"
         
         return insights
     

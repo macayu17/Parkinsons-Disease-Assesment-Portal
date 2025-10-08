@@ -1,6 +1,7 @@
 """
 Transformer-based models for Parkinson's disease classification.
-This module implements various transformer architectures adapted for tabular data.
+This module implements pretrained transformer models (DistilBERT, BioBERT, PubMedBERT) 
+adapted for tabular data with RAG integration.
 """
 
 import torch
@@ -12,88 +13,200 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from sklearn.model_selection import StratifiedKFold
 import joblib
 import os
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, List, Optional
 import matplotlib.pyplot as plt
 import seaborn as sns
+from transformers import (
+    AutoModel, 
+    AutoTokenizer, 
+    DistilBertModel, 
+    DistilBertTokenizer,
+    BertModel,
+    BertTokenizer
+)
 
 
 class TabularDataset(Dataset):
     """Custom dataset for tabular data."""
     
-    def __init__(self, X, y):
+    def __init__(self, X, y, feature_names=None):
         self.X = torch.FloatTensor(X)
         self.y = torch.LongTensor(y)
+        self.feature_names = feature_names or [f"feature_{i}" for i in range(X.shape[1])]
     
     def __len__(self):
         return len(self.X)
     
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
-
-
-class TabularTransformer(nn.Module):
-    """Transformer model adapted for tabular data."""
     
-    def __init__(self, input_dim: int, num_classes: int, d_model: int = 128, 
-                 nhead: int = 8, num_layers: int = 3, dropout: float = 0.1):
-        super(TabularTransformer, self).__init__()
+    def get_feature_description(self, idx):
+        """Get feature values with names for text representation."""
+        sample = self.X[idx].numpy()
+        return {name: float(val) for name, val in zip(self.feature_names, sample)}
+
+
+class DistilBERTForTabular(nn.Module):
+    """DistilBERT model adapted for tabular data with RAG integration."""
+    
+    def __init__(self, input_dim: int, num_classes: int, dropout: float = 0.1):
+        super(DistilBERTForTabular, self).__init__()
         
         self.input_dim = input_dim
-        self.d_model = d_model
         self.num_classes = num_classes
+        self.model_name = "distilbert-base-uncased"
         
-        # Feature embedding - each feature gets its own embedding
-        self.feature_embeddings = nn.ModuleList([
-            nn.Linear(1, d_model) for _ in range(input_dim)
-        ])
+        # Load pretrained DistilBERT model and tokenizer
+        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_name)
+        self.bert = DistilBertModel.from_pretrained(self.model_name)
         
-        # Positional encoding for features
-        self.positional_encoding = nn.Parameter(torch.randn(1, input_dim, d_model))
-        
-        # Transformer encoder
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model,
-            nhead=nhead,
-            dim_feedforward=d_model * 4,
-            dropout=dropout,
-            batch_first=True
-        )
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        # Freeze BERT parameters to speed up training
+        for param in self.bert.parameters():
+            param.requires_grad = False
+            
+        # Feature projection layer
+        self.feature_projection = nn.Linear(input_dim, 768)  # Project to BERT hidden size
         
         # Classification head
         self.classifier = nn.Sequential(
-            nn.LayerNorm(d_model),
-            nn.Linear(d_model, d_model // 2),
+            nn.Linear(768, 256),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(d_model // 2, num_classes)
+            nn.Linear(256, num_classes)
         )
         
-    def forward(self, x):
-        batch_size = x.size(0)
+    def forward(self, x, text_input=None):
+        # Project tabular features
+        tabular_features = self.feature_projection(x)
         
-        # Create embeddings for each feature
-        feature_embeddings = []
-        for i in range(self.input_dim):
-            # Extract feature i and embed it
-            feature_val = x[:, i:i+1]  # (batch_size, 1)
-            embedded = self.feature_embeddings[i](feature_val)  # (batch_size, d_model)
-            feature_embeddings.append(embedded)
-        
-        # Stack embeddings: (batch_size, input_dim, d_model)
-        x = torch.stack(feature_embeddings, dim=1)
-        
-        # Add positional encoding
-        x = x + self.positional_encoding
-        
-        # Apply transformer encoder
-        x = self.transformer_encoder(x)
-        
-        # Global average pooling across features
-        x = x.mean(dim=1)  # (batch_size, d_model)
+        if text_input is not None:
+            # Process text input if available (for RAG integration)
+            inputs = self.tokenizer(text_input, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            inputs = {k: v.to(x.device) for k, v in inputs.items()}
+            
+            # Get BERT embeddings
+            with torch.no_grad():
+                outputs = self.bert(**inputs)
+                text_features = outputs.last_hidden_state[:, 0, :]  # CLS token
+                
+            # Combine tabular and text features
+            combined_features = tabular_features + text_features
+        else:
+            # Use only tabular features if no text input
+            combined_features = tabular_features
         
         # Classification
-        output = self.classifier(x)
+        output = self.classifier(combined_features)
+        
+        return output
+
+
+class BioBERTForTabular(nn.Module):
+    """BioBERT model adapted for tabular data with RAG integration."""
+    
+    def __init__(self, input_dim: int, num_classes: int, dropout: float = 0.1):
+        super(BioBERTForTabular, self).__init__()
+        
+        self.input_dim = input_dim
+        self.num_classes = num_classes
+        self.model_name = "dmis-lab/biobert-v1.1"
+        
+        # Load pretrained BioBERT model and tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.bert = AutoModel.from_pretrained(self.model_name)
+        
+        # Freeze BERT parameters to speed up training
+        for param in self.bert.parameters():
+            param.requires_grad = False
+            
+        # Feature projection layer
+        self.feature_projection = nn.Linear(input_dim, 768)  # Project to BERT hidden size
+        
+        # Classification head
+        self.classifier = nn.Sequential(
+            nn.Linear(768, 256),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(256, num_classes)
+        )
+        
+    def forward(self, x, text_input=None):
+        # Project tabular features
+        tabular_features = self.feature_projection(x)
+        
+        if text_input is not None:
+            # Process text input if available (for RAG integration)
+            inputs = self.tokenizer(text_input, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            inputs = {k: v.to(x.device) for k, v in inputs.items()}
+            
+            # Get BERT embeddings
+            with torch.no_grad():
+                outputs = self.bert(**inputs)
+                text_features = outputs.last_hidden_state[:, 0, :]  # CLS token
+                
+            # Combine tabular and text features
+            combined_features = tabular_features + text_features
+        else:
+            # Use only tabular features if no text input
+            combined_features = tabular_features
+        
+        # Classification
+        output = self.classifier(combined_features)
+        
+        return output
+
+
+class PubMedBERTForTabular(nn.Module):
+    """PubMedBERT model adapted for tabular data with RAG integration."""
+    
+    def __init__(self, input_dim: int, num_classes: int, dropout: float = 0.1):
+        super(PubMedBERTForTabular, self).__init__()
+        
+        self.input_dim = input_dim
+        self.num_classes = num_classes
+        self.model_name = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext"
+        
+        # Load pretrained PubMedBERT model and tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.bert = AutoModel.from_pretrained(self.model_name)
+        
+        # Freeze BERT parameters to speed up training
+        for param in self.bert.parameters():
+            param.requires_grad = False
+            
+        # Feature projection layer
+        self.feature_projection = nn.Linear(input_dim, 768)  # Project to BERT hidden size
+        
+        # Classification head
+        self.classifier = nn.Sequential(
+            nn.Linear(768, 256),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(256, num_classes)
+        )
+        
+    def forward(self, x, text_input=None):
+        # Project tabular features
+        tabular_features = self.feature_projection(x)
+        
+        if text_input is not None:
+            # Process text input if available (for RAG integration)
+            inputs = self.tokenizer(text_input, return_tensors="pt", padding=True, truncation=True, max_length=512)
+            inputs = {k: v.to(x.device) for k, v in inputs.items()}
+            
+            # Get BERT embeddings
+            with torch.no_grad():
+                outputs = self.bert(**inputs)
+                text_features = outputs.last_hidden_state[:, 0, :]  # CLS token
+                
+            # Combine tabular and text features
+            combined_features = tabular_features + text_features
+        else:
+            # Use only tabular features if no text input
+            combined_features = tabular_features
+        
+        # Classification
+        output = self.classifier(combined_features)
         
         return output
 
@@ -136,7 +249,30 @@ class TransformerModels:
     def create_model(self, model_type: str, input_dim: int, num_classes: int, **kwargs):
         """Create a model of specified type."""
         if model_type == 'transformer':
-            model = TabularTransformer(input_dim, num_classes, **kwargs)
+            # For backward compatibility with saved models
+            if 'd_model' in kwargs:
+                # This is the old TabularTransformer model structure
+                d_model = kwargs.get('d_model', 256)
+                nhead = kwargs.get('nhead', 8)
+                num_layers = kwargs.get('num_layers', 4)
+                dropout = kwargs.get('dropout', 0.1)
+                
+                # Create a compatible model structure
+                model = FeedForwardNetwork(input_dim, num_classes, 
+                                          hidden_dims=[d_model, d_model//2, d_model//4], 
+                                          dropout=dropout)
+            else:
+                # New transformer models
+                model_name = kwargs.get('model_name', 'distilbert')
+                if model_name == 'distilbert':
+                    model = DistilBERTForTabular(input_dim, num_classes, dropout=kwargs.get('dropout', 0.1))
+                elif model_name == 'biobert':
+                    model = BioBERTForTabular(input_dim, num_classes, dropout=kwargs.get('dropout', 0.1))
+                elif model_name == 'pubmedbert':
+                    model = PubMedBERTForTabular(input_dim, num_classes, dropout=kwargs.get('dropout', 0.1))
+                else:
+                    # Default to DistilBERT if model name not specified
+                    model = DistilBERTForTabular(input_dim, num_classes, dropout=kwargs.get('dropout', 0.1))
         elif model_type == 'feedforward':
             model = FeedForwardNetwork(input_dim, num_classes, **kwargs)
         else:

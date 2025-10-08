@@ -25,22 +25,40 @@ app.secret_key = 'parkinson_assessment_secret_key_2024'
 # Initialize global components
 report_generator = None
 knowledge_base = MedicalKnowledgeBase()
-document_manager = DocumentManager("medical_docs")
+
+# Get the correct path for medical_docs - check both src and root
+current_dir = os.path.dirname(os.path.abspath(__file__))
+medical_docs_path = os.path.join(os.path.dirname(current_dir), "medical_docs")
+if not os.path.exists(medical_docs_path):
+    medical_docs_path = os.path.join(current_dir, "medical_docs")
+    if not os.path.exists(medical_docs_path):
+        # Create the directory if it doesn't exist
+        os.makedirs(medical_docs_path, exist_ok=True)
+
+document_manager = DocumentManager(medical_docs_path)
 
 def initialize_system():
     """Initialize the ML models and report generator."""
     global report_generator
     try:
         # Initialize document manager with medical documents
-        print(f"Loaded {document_manager.get_document_count()} medical documents")
+        doc_count = document_manager.get_document_count()
+        print(f"Loaded {doc_count} medical documents")
         
-        # Initialize report generator with document manager
-        report_generator = ReportGenerator(knowledge_base, docs_dir="medical_docs")
+        # Initialize report generator with document manager - use correct path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        docs_dir = os.path.join(os.path.dirname(current_dir), "medical_docs")
+        if not os.path.exists(docs_dir):
+            docs_dir = os.path.join(current_dir, "medical_docs")
+        
+        report_generator = ReportGenerator(knowledge_base, docs_dir=docs_dir)
+        print("Loading ML models...")
         report_generator.load_models()
         print("System initialized successfully")
         return True
     except Exception as e:
         print(f"Error initializing system: {e}")
+        traceback.print_exc()
         return False
 
 @app.route('/')
@@ -120,6 +138,8 @@ def predict():
         if not patient_data:
             return jsonify({'error': 'No patient data provided'}), 400
         
+        print(f"Received patient data: {patient_data}")
+        
         # Validate required fields
         required_fields = ['age', 'SEX', 'EDUCYRS', 'BMI']
         missing_fields = [field for field in required_fields if field not in patient_data]
@@ -129,13 +149,16 @@ def predict():
         
         # Initialize system if not already done
         if report_generator is None:
+            print("Initializing system...")
             if not initialize_system():
                 return jsonify({'error': 'System initialization failed'}), 500
         
         # Make prediction
+        print("Making prediction...")
         prediction_results = report_generator.predict_patient(patient_data)
+        print(f"Prediction results: {prediction_results}")
         
-        # Map prediction to class name
+        # Map prediction to class name - 4 classes
         class_names = ['Healthy Control', 'Parkinson\'s Disease', 'SWEDD', 'Prodromal PD']
         predicted_class = class_names[prediction_results['ensemble_prediction']]
         
@@ -152,6 +175,7 @@ def predict():
             'timestamp': datetime.now().isoformat()
         }
         
+        print(f"Returning response: {response}")
         return jsonify(response)
         
     except Exception as e:

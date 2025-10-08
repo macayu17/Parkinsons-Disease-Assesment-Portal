@@ -18,7 +18,7 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="patient_id" class="form-label">Patient ID</label>
+                                <label for="patient_id" class="form-label" style="color: #000000 !important; background-color: #ffffff !important; font-weight: 700 !important; display: inline-block !important; padding: 2px 5px !important; border-radius: 3px !important; box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; border: 1px solid #000 !important;">Patient ID</label>
                                 <input type="text" class="form-control" id="patient_id" name="patient_id" 
                                        placeholder="Enter patient identifier">
                             </div>
@@ -30,7 +30,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="SEX" class="form-label">Sex <span class="text-danger">*</span></label>
+                                <label for="SEX" class="form-label" data-tooltip="Biological sex of the patient">Sex <span class="text-danger">*</span></label>
                                 <select class="form-control" id="SEX" name="SEX" required>
                                     <option value="">Select sex</option>
                                     <option value="0">Female</option>
@@ -38,7 +38,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="EDUCYRS" class="form-label">Education Years <span class="text-danger">*</span></label>
+                                <label for="EDUCYRS" class="form-label" data-tooltip="Total years of formal education completed">Education Years <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="EDUCYRS" name="EDUCYRS" 
                                        min="0" max="25" required placeholder="Years of education">
                             </div>
@@ -92,7 +92,7 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="sym_tremor" class="form-label">Tremor Severity</label>
+                                <label for="sym_tremor" class="form-label" data-tooltip="Rhythmic, involuntary movements, often in hands, fingers, or chin. A cardinal symptom of Parkinson's disease.">Tremor Severity</label>
                                 <select class="form-control" id="sym_tremor" name="sym_tremor">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -102,7 +102,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sym_rigid" class="form-label">Rigidity</label>
+                                <label for="sym_rigid" class="form-label" data-tooltip="Stiffness in limbs and trunk that increases with movement. A cardinal symptom of Parkinson's disease.">Rigidity</label>
                                 <select class="form-control" id="sym_rigid" name="sym_rigid">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -114,7 +114,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="sym_brady" class="form-label">Bradykinesia</label>
+                                <label for="sym_brady" class="form-label" data-tooltip="Slowness of movement, a cardinal symptom of Parkinson's disease. Includes difficulty initiating movements and reduced amplitude of movement.">Bradykinesia</label>
                                 <select class="form-control" id="sym_brady" name="sym_brady">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -124,7 +124,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sym_posins" class="form-label">Postural Instability</label>
+                                <label for="sym_posins" class="form-label" data-tooltip="Impaired balance and coordination leading to instability when standing or walking. A cardinal symptom that typically appears in later stages of Parkinson's disease.">Postural Instability</label>
                                 <select class="form-control" id="sym_posins" name="sym_posins">
                                     <option value="0">0 - None</option>
                                     <option value="1">1 - Mild</option>
@@ -143,7 +143,7 @@
                         </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="rem" class="form-label">REM Sleep Disorder</label>
+                                <label for="rem" class="form-label" data-tooltip="REM Sleep Behavior Disorder (RBD) is characterized by acting out dreams during REM sleep. It's a strong prodromal marker for Parkinson's disease.">REM Sleep Disorder</label>
                                 <select class="form-control" id="rem" name="rem">
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
@@ -208,7 +208,7 @@
                 </form>
 
                 <!-- Loading Spinner -->
-                <div id="loadingSpinner" class="loading-spinner text-center mt-4">
+                <div id="loadingSpinner" class="loading-spinner text-center mt-4" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Processing...</span>
                     </div>
@@ -292,6 +292,12 @@
         document.getElementById('resultsSection').style.display = 'none';
         document.getElementById('reportSection').style.display = 'none';
         
+        // Set a timeout to handle potential server issues
+        const timeoutId = setTimeout(() => {
+            hideLoading('loadingSpinner');
+            showAlert('The server is taking too long to respond. Please try again.', 'warning');
+        }, 30000); // 30 second timeout
+        
         // Make prediction
         fetch('/api/predict', {
             method: 'POST',
@@ -300,7 +306,10 @@
             },
             body: JSON.stringify(patientData)
         })
-        .then(response => response.json())
+        .then(response => {
+            clearTimeout(timeoutId);
+            return response.json();
+        })
         .then(data => {
             hideLoading('loadingSpinner');
             
@@ -308,9 +317,11 @@
                 showAlert(data.error, 'danger');
             } else {
                 displayResults(data);
+                document.getElementById('resultsSection').style.display = 'block';
             }
         })
         .catch(error => {
+            clearTimeout(timeoutId);
             hideLoading('loadingSpinner');
             showAlert('Error running assessment: ' + error.message, 'danger');
         });
@@ -318,6 +329,7 @@
 
     function displayResults(results) {
         const resultsDiv = document.getElementById('predictionResults');
+        document.getElementById('resultsSection').style.display = 'block';
         
         // Determine confidence level and color
         let confidenceClass = 'low-confidence';
@@ -377,6 +389,11 @@
             probabilityChart.destroy();
         }
         
+        // Detect current theme for chart styling
+        const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDarkMode ? '#f5f5f5' : '#333';
+        const gridColor = isDarkMode ? '#444' : '#ddd';
+        
         probabilityChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -408,7 +425,19 @@
                         ticks: {
                             callback: function(value) {
                                 return value + '%';
-                            }
+                            },
+                            color: textColor
+                        },
+                        grid: {
+                            color: gridColor
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: textColor
+                        },
+                        grid: {
+                            color: gridColor
                         }
                     }
                 },
