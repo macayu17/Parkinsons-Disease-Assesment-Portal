@@ -62,11 +62,11 @@ def main():
     # Initialize preprocessor and prepare data
     preprocessor = DataPreprocessor()
     
-    # Use all three datasets
+    # Use all available datasets
     file_paths = [
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20241211.csv",
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20250321.csv",
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20250714.csv"
+        "D:/parkinson/Parkinsons-Disease-Assesment-Portal-main/PPMI_Curated_Data_Cut_Public_20241211.csv",
+        "D:/parkinson/Parkinsons-Disease-Assesment-Portal-main/PPMI_Curated_Data_Cut_Public_20250321.csv",
+        "D:/parkinson/Parkinsons-Disease-Assesment-Portal-main/PPMI_Curated_Data_Cut_Public_20250714.csv"
     ]
     
     # Load and combine all datasets

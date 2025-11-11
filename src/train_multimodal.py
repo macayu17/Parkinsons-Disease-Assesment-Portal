@@ -31,7 +31,7 @@ def main():
     preprocessor = DataPreprocessor()
     
     # Load and preprocess data
-    data_path = r"d:\5th Semester\Projects\MiniProject\Try1\PPMI_Curated_Data_Cut_Public_20250714.csv"
+    data_path = r"d:\parkinson\Parkinsons-Disease-Assesment-Portal-main\PPMI_Curated_Data_Cut_Public_20250714.csv"
     if not os.path.exists(data_path):
         print(f"Error: Data file not found at {data_path}")
         return
