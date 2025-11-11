@@ -39,12 +39,11 @@ def main():
     # Initialize preprocessor and load data
     preprocessor = DataPreprocessor()
     
-    # Use all four datasets
+    # Use all available datasets
     file_paths = [
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20241211.csv",
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20250321.csv",
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20250714.csv",
-        "D:/5th Semester/Projects/MiniProject/Try1/PPMI_Curated_Data_Cut_Public_20251105.csv"
+        "D:/parkinson/Parkinsons-Disease-Assesment-Portal-main/PPMI_Curated_Data_Cut_Public_20241211.csv",
+        "D:/parkinson/Parkinsons-Disease-Assesment-Portal-main/PPMI_Curated_Data_Cut_Public_20250321.csv",
+        "D:/parkinson/Parkinsons-Disease-Assesment-Portal-main/PPMI_Curated_Data_Cut_Public_20250714.csv"
     ]
     
     # Configure GPU if available
@@ -319,8 +318,10 @@ def main():
                 break
         
         # Save the best model
-        torch.save(best_model_state, f"../models/{model_name}_model.pth")
-        print(f"Best {model_name} model saved with validation loss: {best_val_loss:.4f}")
+        os.makedirs("../models/saved", exist_ok=True)
+        model_path = f"../models/saved/{model_name}_transformer.pth"
+        torch.save(best_model_state, model_path)
+        print(f"Best {model_name} model saved to {model_path} with validation loss: {best_val_loss:.4f}")
         
         # Evaluate on test set
         model.load_state_dict(best_model_state)
@@ -379,6 +380,9 @@ def main():
         plt.ylabel('True')
         plt.title(f'{model_name} - Confusion Matrix')
         plt.tight_layout()
+
+        # Ensure notebooks directory exists
+        os.makedirs('../notebooks', exist_ok=True)
         plt.savefig(f'../notebooks/{model_name}_confusion_matrix.png', dpi=300, bbox_inches='tight')
         plt.close()
         

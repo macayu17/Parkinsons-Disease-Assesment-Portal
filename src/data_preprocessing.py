@@ -178,6 +178,13 @@ class DataPreprocessor:
             df['cognitive_composite'] = df[cognitive_norm].mean(axis=1)
         
         return df
+
+    def get_feature_names(self):
+        """Get list of feature names used in the model"""
+        feature_names = []
+        for category in self.key_features.values():
+            feature_names.extend(category)
+        return feature_names
     
     def prepare_data(self, file_path_or_df, test_size=0.2, random_state=42):
         """Complete data preparation pipeline"""
@@ -204,6 +211,10 @@ class DataPreprocessor:
         # Scale numerical features
         numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
         df[numeric_cols] = self.scaler.fit_transform(df[numeric_cols])
+
+        # Store feature names for later use
+        if 'COHORT' in df.columns:
+            self.feature_names_ = df.drop('COHORT', axis=1).columns.tolist()
         
         # Split features and target
         if 'COHORT' in df.columns:
