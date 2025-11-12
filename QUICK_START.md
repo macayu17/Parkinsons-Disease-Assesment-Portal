@@ -1,17 +1,64 @@
 # Quick Start Guide
 
-## Running the Application
+Get up and running with the Parkinson's Disease Assessment Portal in minutes!
 
-### Option 1: Using the Batch File (Easiest)
+## 🚀 Quick Setup (5 Minutes)
+
+### Step 1: Install Dependencies
+```bash
+# Clone the repository
+git clone https://github.com/macayu17/Parkinsons-Disease-Assesment-Portal.git
+cd Parkinsons-Disease-Assesment-Portal
+
+# Create and activate virtual environment
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install required packages
+pip install -r requirements.txt
+```
+
+### Step 2: Verify Installation (Optional)
+```bash
+# Test CUDA setup (if you have NVIDIA GPU)
+python test_cuda.py
+
+# Run system tests
+python test_system.py
+```
+
+## 🏃 Running the Application
+
+### Option 1: Using the Batch File (Windows - Easiest)
 1. Double-click `run_web_app.bat`
 2. Wait for the server to start
 3. Open your browser to http://localhost:5000
 
-### Option 2: Using PowerShell
-```powershell
-cd "d:\5th Semester\Projects\MiniProject\Try1\src"
+### Option 2: Using Command Line
+```bash
+# Navigate to the project directory
+cd Parkinsons-Disease-Assesment-Portal
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Run the web interface
+cd src
 python web_interface.py
 ```
+
+### Option 3: Using Python Directly
+```bash
+python src/web_interface.py
+```
+
+The server will start on http://localhost:5000
 
 ## Using the Assessment System
 
